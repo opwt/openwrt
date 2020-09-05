@@ -17,6 +17,7 @@ HOST_BUILD_DEPENDS:=libsepol/host pcre/host
 PKG_MAINTAINER:=Thomas Petazzoni <thomas.petazzoni@bootlin.com>
 
 include $(INCLUDE_DIR)/package.mk
+include $(INCLUDE_DIR)/host-build.mk
 
 define Package/libselinux
   SECTION:=libs
@@ -36,7 +37,13 @@ define Package/libselinux/description
 	older version supported by the kernel) when loading policy.
 endef
 
-include $(INCLUDE_DIR)/host-build.mk
+define Package/libselinux-utils
+  SECTION:=utils
+  DEPENDS:=+libselinux
+  CATEGORY:=Utilities
+  TITLE:=Runtime SELinux utilities
+  URL:=http://selinuxproject.org/page/Main_Page
+endef
 
 # Needed to link libselinux utilities, which link against
 # libselinux.so, which indirectly depends on libpcre.so, installed in
@@ -76,5 +83,11 @@ define Package/libselinux/install
 	$(CP) $(PKG_INSTALL_DIR)/usr/lib/libselinux.so.* $(1)/usr/lib/
 endef
 
+define Package/libselinux-utils/install
+	$(INSTALL_DIR) $(1)/usr/sbin
+	$(CP) $(PKG_INSTALL_DIR)/usr/sbin/* $(1)/usr/sbin
+endef
+
 $(eval $(call HostBuild))
 $(eval $(call BuildPackage,libselinux))
+$(eval $(call BuildPackage,libselinux-utils))
