@@ -7,7 +7,6 @@
 
 / {
 	aliases {
-		serial0 = &uart;
 		led-boot = &led_power;
 		led-failsafe = &led_power;
 		led-running = &led_power;
@@ -66,10 +65,6 @@
 	clock-frequency = <25000000>;
 };
 
-&uart {
-	status = "okay";
-};
-
 &gpio {
 	pinctrl-names = "default";
 	pinctrl-0 = <&jtag_disable_pins &pmx_usb_power>;
@@ -87,7 +82,7 @@
 	phy-handle = <&swphy0>;
 
 	mtd-mac-address = <&uboot 0x1fc00>;
-	mtd-mac-address-increment = <(-1)>;
+	mac-address-increment = <(-1)>;
 };
 
 &eth1 {

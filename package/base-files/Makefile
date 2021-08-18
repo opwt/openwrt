@@ -1,5 +1,5 @@
 #
-# Copyright (C) 2007-2016 OpenWrt.org
+# Copyright (C) 2007-2021 OpenWrt.org
 # Copyright (C) 2010 Vertical Communications
 #
 # This is free software, licensed under the GNU General Public License v2.
@@ -12,8 +12,8 @@ include $(INCLUDE_DIR)/version.mk
 include $(INCLUDE_DIR)/feeds.mk
 
 PKG_NAME:=base-files
-PKG_RELEASE:=240
 PKG_FLAGS:=nonshared
+PKG_RELEASE:=$(COMMITCOUNT)
 
 PKG_FILE_DEPENDS:=$(PLATFORM_DIR)/ $(GENERIC_PLATFORM_DIR)/base-files/
 PKG_BUILD_DEPENDS:=usign/host ucert/host
@@ -23,6 +23,7 @@ PKG_LICENSE:=GPL-2.0
 PKG_CONFIG_DEPENDS += \
 	CONFIG_SIGNED_PACKAGES CONFIG_TARGET_INIT_PATH CONFIG_TARGET_PREINIT_DISABLE_FAILSAFE \
 	CONFIG_NAND_SUPPORT \
+	CONFIG_LEGACY_SDCARD_SUPPORT \
 	CONFIG_CLEAN_IPKG \
 	CONFIG_PER_FEED_REPO \
 	$(foreach feed,$(FEEDS_AVAILABLE),CONFIG_FEED_$(feed))
@@ -30,7 +31,7 @@ PKG_CONFIG_DEPENDS += \
 include $(INCLUDE_DIR)/package.mk
 
 ifneq ($(DUMP),1)
-  STAMP_CONFIGURED:=$(strip $(STAMP_CONFIGURED))_$(shell echo $(CONFIG_TARGET_INIT_PATH) | mkhash md5)
+  STAMP_CONFIGURED:=$(strip $(STAMP_CONFIGURED))_$(shell echo $(CONFIG_TARGET_INIT_PATH) | $(MKHASH) md5)
   TARGET:=-$(BOARD)
 endif
 
@@ -47,7 +48,6 @@ define Package/base-files/conffiles
 /etc/config/
 /etc/config/network
 /etc/config/system
-/etc/crontabs/
 /etc/dropbear/
 /etc/ethers
 /etc/group
@@ -124,10 +124,18 @@ ifeq ($(CONFIG_NAND_SUPPORT),)
   endef
 endif
 
+ifeq ($(CONFIG_LEGACY_SDCARD_SUPPORT),)
+  define Package/base-files/legacy-sdcard-support
+	rm -f $(1)/lib/upgrade/legacy-sdcard.sh
+  endef
+endif
+
+
 define Package/base-files/install
 	$(CP) ./files/* $(1)/
 	$(Package/base-files/install-key)
 	$(Package/base-files/nand-support)
+	$(Package/base-files/legacy-sdcard-support)
 	if [ -d $(GENERIC_PLATFORM_DIR)/base-files/. ]; then \
 		$(CP) $(GENERIC_PLATFORM_DIR)/base-files/* $(1)/; \
 	fi
@@ -202,6 +210,9 @@ define Package/base-files/install
 		$(VERSION_SED_SCRIPT) $(1)/etc/opkg/distfeeds.conf)
 	$(if $(CONFIG_IPK_FILES_CHECKSUMS),, \
 		rm -f $(1)/sbin/pkg_check)
+
+	$(if $(CONFIG_TARGET_PREINIT_DISABLE_FAILSAFE), \
+		rm -f $(1)/etc/banner.failsafe,)
 endef
 
 ifneq ($(DUMP),1)

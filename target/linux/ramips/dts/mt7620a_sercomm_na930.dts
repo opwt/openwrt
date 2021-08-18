@@ -128,10 +128,6 @@
 	status = "okay";
 };
 
-&gpio1 {
-	status = "okay";
-};
-
 &gpio2 {
 	status = "okay";
 };
@@ -170,7 +166,8 @@
 };
 
 &gsw {
-	mediatek,port4 = "gmac";
+	mediatek,port4-gmac;
+	mediatek,ephy-base = /bits/ 8 <8>;
 };
 
 &ehci {
