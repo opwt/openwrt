@@ -118,6 +118,7 @@
 		compatible = "mediatek,mt76";
 		reg = <0x0000 0 0 0 0>;
 		mediatek,mtd-eeprom = <&factory 0x0000>;
+		mediatek,disable-radar-background;
 	};
 };
 
@@ -156,11 +157,6 @@
 		port@3 {
 			status = "okay";
 			label = "lan3";
-		};
-
-		port@4 {
-			status = "okay";
-			label = "lan4";
 		};
 	};
 };

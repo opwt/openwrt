@@ -131,7 +131,7 @@ hostapd_prepare_device_config() {
 
 	local base_cfg=
 
-	json_get_vars country country3 country_ie beacon_int:100 dtim_period:2 doth require_mode legacy_rates \
+	json_get_vars country country3 country_ie beacon_int:100 doth require_mode legacy_rates \
 		acs_chan_bias local_pwr_constraint spectrum_mgmt_required airtime_mode cell_density \
 		rts_threshold beacon_rate rssi_reject_assoc_rssi rssi_ignore_probe_request maxassoc
 
@@ -232,7 +232,6 @@ hostapd_prepare_device_config() {
 	[ -n "$brlist" ] && append base_cfg "basic_rates=$brlist" "$N"
 	append base_cfg "beacon_int=$beacon_int" "$N"
 	[ -n "$rts_threshold" ] && append base_cfg "rts_threshold=$rts_threshold" "$N"
-	append base_cfg "dtim_period=$dtim_period" "$N"
 	[ "$airtime_mode" -gt 0 ] && append base_cfg "airtime_mode=$airtime_mode" "$N"
 	[ -n "$maxassoc" ] && append base_cfg "iface_max_num_sta=$maxassoc" "$N"
 
@@ -361,7 +360,7 @@ hostapd_common_add_bss_config() {
 	config_add_array airtime_sta_weight
 	config_add_int airtime_bss_weight airtime_bss_limit
 
-	config_add_boolean multicast_to_unicast proxy_arp per_sta_vif
+	config_add_boolean multicast_to_unicast multicast_to_unicast_all proxy_arp per_sta_vif
 
 	config_add_array hostapd_bss_options
 	config_add_boolean default_disabled
@@ -547,7 +546,7 @@ hostapd_set_bss_options() {
 		bss_load_update_period chan_util_avg_period sae_require_mfp sae_pwe \
 		multi_ap multi_ap_backhaul_ssid multi_ap_backhaul_key skip_inactivity_poll \
 		ppsk airtime_bss_weight airtime_bss_limit airtime_sta_weight \
-		multicast_to_unicast proxy_arp per_sta_vif \
+		multicast_to_unicast_all proxy_arp per_sta_vif \
 		eap_server eap_user_file ca_cert server_cert private_key private_key_passwd server_id \
 		vendor_elements fils ocv
 
@@ -889,7 +888,7 @@ hostapd_set_bss_options() {
 			json_get_vars mobility_domain ft_psk_generate_local ft_over_ds reassociation_deadline
 
 			set_default mobility_domain "$(echo "$ssid" | md5sum | head -c 4)"
-			set_default ft_over_ds 1
+			set_default ft_over_ds 0
 			set_default reassociation_deadline 1000
 
 			case "$auth_type" in
@@ -1130,9 +1129,9 @@ hostapd_set_bss_options() {
 		[ -n "$server_id" ] && append bss_conf "server_id=$server_id" "$N"
 	fi
 
-	set_default multicast_to_unicast 0
-	if [ "$multicast_to_unicast" -gt 0 ]; then
-		append bss_conf "multicast_to_unicast=$multicast_to_unicast" "$N"
+	set_default multicast_to_unicast_all 0
+	if [ "$multicast_to_unicast_all" -gt 0 ]; then
+		append bss_conf "multicast_to_unicast=$multicast_to_unicast_all" "$N"
 	fi
 	set_default proxy_arp 0
 	if [ "$proxy_arp" -gt 0 ]; then
@@ -1323,7 +1322,7 @@ wpa_supplicant_add_network() {
 	}
 
 	[ "$_w_mode" = "mesh" ] && {
-		json_get_vars mesh_id mesh_fwding mesh_rssi_threshold
+		json_get_vars mesh_id mesh_fwding mesh_rssi_threshold encryption
 		[ -n "$mesh_id" ] && ssid="${mesh_id}"
 
 		append network_data "mode=5" "$N$T"
@@ -1331,7 +1330,7 @@ wpa_supplicant_add_network() {
 		[ -n "$mesh_rssi_threshold" ] && append network_data "mesh_rssi_threshold=${mesh_rssi_threshold}" "$N$T"
 		[ -n "$freq" ] && wpa_supplicant_set_fixed_freq "$freq" "$htmode"
 		[ "$noscan" = "1" ] && append network_data "noscan=1" "$N$T"
-		append wpa_key_mgmt "SAE"
+		[ "$encryption" = "none" -o -z "$encryption" ] || append wpa_key_mgmt "SAE"
 		scan_ssid=""
 	}
 
