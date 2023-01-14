@@ -320,6 +320,18 @@ define Device/jotale_js76x8-32m
 endef
 TARGET_DEVICES += jotale_js76x8-32m
 
+define Device/keenetic_kn-1613
+  BLOCKSIZE := 64k
+  IMAGE_SIZE := 31488k
+  DEVICE_VENDOR := Keenetic
+  DEVICE_MODEL := KN-1613
+  DEVICE_PACKAGES := kmod-mt7615e kmod-mt7663-firmware-ap
+  IMAGES += factory.bin
+  IMAGE/factory.bin := $$(sysupgrade_bin) | pad-to $$$$(BLOCKSIZE) | \
+	check-size | zyimage -d 0x801613 -v "KN-1613"
+endef
+TARGET_DEVICES += keenetic_kn-1613
+
 define Device/kroks_kndrt31r16
   IMAGE_SIZE := 16064k
   DEVICE_VENDOR := Kroks
@@ -341,6 +353,21 @@ define Device/kroks_kndrt31r19
   SUPPORTED_DEVICES += kndrt31r19
 endef
 TARGET_DEVICES += kroks_kndrt31r19
+
+define Device/linksys_e5400
+  IMAGE_SIZE := 16000k
+  DEVICE_VENDOR := Linksys
+  DEVICE_MODEL := E5400
+  DEVICE_ALT0_VENDOR := Linksys
+  DEVICE_ALT0_MODEL := E2500
+  DEVICE_ALT0_VARIANT := v4
+  DEVICE_ALT1_VENDOR := Linksys
+  DEVICE_ALT1_MODEL := E5300
+  DEVICE_ALT2_VENDOR := Linksys
+  DEVICE_ALT2_MODEL := E5350
+  DEVICE_PACKAGES := kmod-mt76x2
+endef
+TARGET_DEVICES += linksys_e5400
 
 define Device/mediatek_linkit-smart-7688
   IMAGE_SIZE := 32448k
