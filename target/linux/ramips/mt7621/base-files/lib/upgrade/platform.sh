@@ -52,9 +52,11 @@ platform_do_upgrade() {
 	case "$board" in
 	ampedwireless,ally-00x19k|\
 	ampedwireless,ally-r1900k|\
+	arcadyan,we420223-99|\
 	asus,rt-ac65p|\
 	asus,rt-ac85p|\
 	asus,rt-ax53u|\
+	asus,rt-ax54|\
 	beeline,smartbox-flash|\
 	beeline,smartbox-giga|\
 	beeline,smartbox-turbo|\
@@ -102,6 +104,7 @@ platform_do_upgrade() {
 	sercomm,na502|\
 	sercomm,na502s|\
 	sim,simax1800t|\
+	tplink,ec330-g5u-v1|\
 	xiaomi,mi-router-3g|\
 	xiaomi,mi-router-3-pro|\
 	xiaomi,mi-router-4|\
